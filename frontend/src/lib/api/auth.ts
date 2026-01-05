@@ -4,7 +4,8 @@ import { AuthResponse, LoginRequest, RegisterRequest, User } from '@/types/api'
 export const authApi = {
   async login(data: LoginRequest): Promise<AuthResponse> {
     // Public access mode: no token storage needed
-    const response = await apiClient.post<AuthResponse>('/api/auth/login', data)
+    // Use /login/json endpoint for JSON payload (vs OAuth2 form-encoded /login)
+    const response = await apiClient.post<AuthResponse>('/api/auth/login/json', data)
     return response
   },
 

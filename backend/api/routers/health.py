@@ -5,6 +5,7 @@ from pydantic import BaseModel
 from typing import Dict, Any
 from datetime import datetime
 import os
+from sqlalchemy import text
 
 from api.core.database import engine
 from api.core.config import settings
@@ -65,7 +66,7 @@ async def readiness_check(response: Response):
     # Check database connection
     try:
         async with engine.connect() as conn:
-            await conn.execute("SELECT 1")
+            await conn.execute(text("SELECT 1"))
         checks["database"] = {
             "status": "ready",
             "type": "postgresql" if "postgresql" in settings.DATABASE_URL else "sqlite"
