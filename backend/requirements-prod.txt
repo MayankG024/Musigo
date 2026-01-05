@@ -1,0 +1,31 @@
+# Production (core) requirements for Musigo backend (pruned)
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+python-multipart==0.0.6
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+python-dotenv==1.0.0
+
+# Database
+sqlalchemy==2.0.23
+alembic==1.12.1
+# asyncpg only if using Postgres; comment out if sticking to SQLite
+# asyncpg==0.29.0
+sqlite-aio==0.17.0
+
+# Vector DB (keep if using Chroma locally)
+chromadb==0.4.18
+
+# Spotify integration
+spotipy==2.23.0
+
+# Pydantic / settings
+pydantic==2.5.0
+pydantic-settings==2.1.0
+
+# Utilities
+requests==2.31.0
+aiofiles==23.2.1
+python-magic==0.4.27
+
+# NOTE: Heavy / optional dependencies moved to requirements-optional.txt

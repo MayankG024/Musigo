@@ -1,0 +1,61 @@
+# Backend-specific Docker ignore
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+*.egg
+*.egg-info
+dist
+build
+.venv
+venv
+pruned-venv
+env
+ENV
+
+# Testing
+.pytest_cache
+.coverage
+htmlcov
+.tox
+
+# IDEs
+.vscode
+.idea
+*.swp
+*.swo
+
+# Environment
+.env.local
+.env.*.local
+
+# Database (use volumes instead)
+*.db
+*.sqlite
+*.sqlite3
+music_discovery.db
+
+# Logs (use volumes)
+logs/
+*.log
+
+# Uploads (use volumes)
+uploads/
+temp/
+
+# ChromaDB (use volumes)
+chroma_db/
+
+# Documentation
+*.md
+
+# Git
+.git
+.gitignore
+
+# Cache
+.cache
+.mypy_cache
+.ruff_cache

@@ -1,0 +1,46 @@
+# Global ignores
+.git
+.gitignore
+**/__pycache__
+**/*.pyc
+**/*.pyo
+**/*.pyd
+*.pytest_cache
+.mypy_cache
+.pytest_cache
+.env
+.env.*
+
+# Python virtual environments
+backend/venv
+venv
+.env/
+
+# Node / Frontend
+frontend/node_modules
+frontend/.next/cache
+frontend/.next/trace
+frontend/.next/types
+
+# Build artifacts
+dist
+build
+*.egg-info
+
+# Model / cache directories
+/root/.cache
+/home/*/.cache
+**/huggingface
+**/transformers
+**/torch
+
+# Local databases / vector persistence (mount as volume instead)
+backend/chroma_db
+backend/music_discovery.db
+
+# Tests & tooling (optional in production image)
+backend/tests
+
+# Logs
+logs
+*.log
