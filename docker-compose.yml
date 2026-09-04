@@ -1,0 +1,140 @@
+services:
+  # ChromaDB Vector Store (server mode)
+  chroma:
+    image: ghcr.io/chroma-core/chroma:0.4.24
+    container_name: musigo_chroma
+    environment:
+      - ALLOW_RESET=true
+    volumes:
+      - ./backend/chroma_db:/chroma/chroma
+    ports:
+      - "8001:8000"
+    networks:
+      - musigo_network
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: musigo_cache
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - musigo_network
+
+  # PostgreSQL Database (production-ready)
+  postgres:
+    image: postgres:15-alpine
+    container_name: musigo_db
+    environment:
+      POSTGRES_USER: ${DB_USER:-musicuser}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-musicpass}
+      POSTGRES_DB: ${DB_NAME:-musicdb}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-musicuser}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - musigo_network
+
+  # Backend API
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: musigo_backend
+    environment:
+      # Use SQLite default inside container unless you opt-in to Postgres later
+      REDIS_URL: redis://redis:6379/0
+      SECRET_KEY: ${SECRET_KEY:-your-secret-key-change-in-production}
+      SPOTIFY_CLIENT_ID: ${SPOTIFY_CLIENT_ID}
+      SPOTIFY_CLIENT_SECRET: ${SPOTIFY_CLIENT_SECRET}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      # Pydantic expects JSON for list values
+      CORS_ORIGINS: '["http://localhost:3000","http://localhost:8000","http://127.0.0.1:3000","http://127.0.0.1:8000"]'
+      # Use Chroma via HTTP to avoid native builds in the API container
+      CHROMA_HTTP_URL: http://chroma:8000
+      # Toggle embeddings: set REQUIRE_CHROMA=true and DISABLE_EMBEDDINGS=false to enable
+      REQUIRE_CHROMA: "true"
+      DISABLE_EMBEDDINGS: "false"
+      # Database URL now targets Postgres service by default
+      DATABASE_URL: "${DATABASE_URL:-postgresql+asyncpg://musicuser:musicpass@postgres:5432/musicdb}"
+    volumes:
+      - ./backend/logs:/app/logs
+      - ./backend/uploads:/app/uploads
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      chroma:
+        condition: service_started
+      redis:
+        condition: service_healthy
+    networks:
+      - musigo_network
+    restart: unless-stopped
+
+  # Embeddings worker (RQ)
+  worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: musigo_worker
+    command: ["python", "worker.py"]
+    environment:
+      REDIS_URL: redis://redis:6379/0
+      CHROMA_HTTP_URL: http://chroma:8000
+      REQUIRE_CHROMA: "true"
+      DISABLE_EMBEDDINGS: "false"
+      DATABASE_URL: "${DATABASE_URL:-postgresql+asyncpg://musicuser:musicpass@postgres:5432/musicdb}"
+    depends_on:
+      redis:
+        condition: service_healthy
+      chroma:
+        condition: service_started
+      postgres:
+        condition: service_healthy
+    networks:
+      - musigo_network
+    restart: unless-stopped
+
+  # Frontend
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8000}
+    container_name: musigo_frontend
+    environment:
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8000}
+      # Used by Next.js rewrites on the server side (SSR/route handlers)
+      API_INTERNAL_URL: http://backend:8000
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    networks:
+      - musigo_network
+    restart: unless-stopped
+
+networks:
+  musigo_network:
+    driver: bridge
+
+volumes:
+  redis_data:
+  postgres_data:

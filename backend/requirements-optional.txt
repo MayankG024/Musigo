@@ -1,0 +1,7 @@
+# Optional dependencies (install only when enabling semantic search)
+
+# Minimal set to power embeddings + Chroma HTTP client (Python 3.12 compatible)
+numpy<2.0
+torch==2.4.1
+sentence-transformers==3.0.1
+chromadb==0.5.23

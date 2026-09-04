@@ -1,0 +1,330 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Theme custom properties */
+:root {
+	/* legacy --bright-purple kept for compatibility but mapped to spotify green to standardize accents */
+	--bright-purple: #1DB954;
+	/* Spotify brand green */
+	--spotify-green: #1DB954;
+	/* Add missing blue to match usage in components */
+	--bright-blue: hsl(220, 100%, 70%);
+	--bright-cyan: hsl(180, 100%, 70%);
+	--bright-green: hsl(160, 80%, 60%);
+	--bright-yellow: hsl(50, 100%, 70%);
+	--dark-primary: hsl(240, 30%, 8%);
+	--text-bright: hsl(0, 0%, 95%);
+	--text-medium: hsl(0, 0%, 80%);
+	--text-dim: hsl(0, 0%, 65%);
+	--glass-border: rgba(255,255,255,0.2);
+}
+
+body {
+	font-family: 'Poppins', sans-serif;
+	background: hsl(240, 30%, 8%);
+	color: hsl(0, 0%, 95%);
+	min-height: 100vh;
+}
+
+/* Cursor-follow gradient effect */
+html, body { position: relative; }
+body::before {
+	content: "";
+	position: fixed;
+	top: 0; left: 0; width: 100%; height: 100%;
+	pointer-events: none;
+	background: radial-gradient(
+		874px circle at var(--cursor-px-x, 50%) var(--cursor-px-y, 50%),
+		rgba(29, 185, 84, 0.30) 0%,
+		rgba(29, 185, 84, 0.14) 22%,
+		rgba(29, 185, 84, 0.06) 38%,
+		rgba(0,0,0,0) 60%
+	);
+	mix-blend-mode: screen;
+	opacity: 0.6;
+	transition: opacity 0.3s ease;
+	z-index: 1;
+}
+
+/* Optional subtle vignette */
+body::after {
+	content: "";
+	position: fixed;
+	inset: 0;
+	pointer-events: none;
+	background: radial-gradient(circle at 50% 50%, rgba(0,0,0,0) 40%, rgba(0,0,0,0.5));
+	z-index: 0;
+}
+
+.glass {
+	background: rgba(255, 255, 255, 0.1);
+	backdrop-filter: blur(20px);
+	border: 1px solid rgba(255, 255, 255, 0.2);
+	border-radius: 16px;
+}
+
+/* Ensure app content sits above lighting overlay */
+#__next, body > div { position: relative; z-index: 2; }
+
+/* Subtle floating background (music mnemonics & emoji) */
+.music-emoji-bg {
+	position: fixed;
+	inset: 0;
+	pointer-events: none;
+	z-index: 1; /* below app content (z=2) but above body vignette (z=0) */
+	overflow: hidden;
+	/* fade at edges so items blend in/out */
+	-webkit-mask-image: linear-gradient(to top, rgba(0,0,0,0), rgba(0,0,0,0.75) 10%, rgba(0,0,0,0.75) 90%, rgba(0,0,0,0));
+					mask-image: linear-gradient(to top, rgba(0,0,0,0), rgba(0,0,0,0.75) 10%, rgba(0,0,0,0.75) 90%, rgba(0,0,0,0));
+}
+.music-emoji-bg .emoji, .music-emoji-bg--highlight .emoji {
+	position: absolute;
+	bottom: -12vh;
+	color: rgba(255,255,255,0.85);
+	opacity: 0.08;
+	font-size: 12px;
+	filter: drop-shadow(0 0 2px rgba(0,0,0,0.25));
+	user-select: none;
+	will-change: transform, opacity;
+	animation: float-up var(--dur, 56s) linear var(--delay, 0s) infinite;
+	transform: translateY(0) scale(1.3);
+}
+/* Localized reveal handled by highlight layer mask; keep base stable */
+body:hover .music-emoji-bg .emoji { opacity: 0.08; }
+
+/* Highlight layer: same content, masked around cursor to reveal more strongly */
+.music-emoji-bg--highlight {
+	position: fixed;
+	inset: 0;
+	pointer-events: none;
+	z-index: 1; /* above base bg by DOM order */
+	-webkit-mask-image: radial-gradient(400px circle at var(--cursor-px-x, 50%) var(--cursor-px-y, 50%), rgba(0,0,0,1) 0%, rgba(0,0,0,0) 70%);
+					mask-image: radial-gradient(400px circle at var(--cursor-px-x, 50%) var(--cursor-px-y, 50%), rgba(0,0,0,1) 0%, rgba(0,0,0,0) 70%);
+}
+.music-emoji-bg--highlight .emoji { opacity: 0.34; }
+
+/* Assign varied positions, sizes, speeds */
+.music-emoji-bg .emoji:nth-child(1),  .music-emoji-bg--highlight .emoji:nth-child(1)  { left: 5%;  --dur: 62s; --delay: -8s;  font-size: 12px; }
+.music-emoji-bg .emoji:nth-child(2),  .music-emoji-bg--highlight .emoji:nth-child(2)  { left: 12%; --dur: 74s; --delay: -20s; font-size: 14px; }
+.music-emoji-bg .emoji:nth-child(3),  .music-emoji-bg--highlight .emoji:nth-child(3)  { left: 18%; --dur: 68s; --delay: -4s;  font-size: 11px; }
+.music-emoji-bg .emoji:nth-child(4),  .music-emoji-bg--highlight .emoji:nth-child(4)  { left: 25%; --dur: 80s; --delay: -30s; font-size: 13px; }
+.music-emoji-bg .emoji:nth-child(5),  .music-emoji-bg--highlight .emoji:nth-child(5)  { left: 33%; --dur: 70s; --delay: -16s; font-size: 12px; }
+.music-emoji-bg .emoji:nth-child(6),  .music-emoji-bg--highlight .emoji:nth-child(6)  { left: 41%; --dur: 76s; --delay: -10s; font-size: 15px; }
+.music-emoji-bg .emoji:nth-child(7),  .music-emoji-bg--highlight .emoji:nth-child(7)  { left: 48%; --dur: 64s; --delay: -2s;  font-size: 12px; }
+.music-emoji-bg .emoji:nth-child(8),  .music-emoji-bg--highlight .emoji:nth-child(8)  { left: 55%; --dur: 86s; --delay: -26s; font-size: 13px; }
+.music-emoji-bg .emoji:nth-child(9),  .music-emoji-bg--highlight .emoji:nth-child(9)  { left: 62%; --dur: 72s; --delay: -12s; font-size: 11px; }
+.music-emoji-bg .emoji:nth-child(10), .music-emoji-bg--highlight .emoji:nth-child(10) { left: 68%; --dur: 78s; --delay: -34s; font-size: 12px; }
+.music-emoji-bg .emoji:nth-child(11), .music-emoji-bg--highlight .emoji:nth-child(11) { left: 73%; --dur: 88s; --delay: -6s;  font-size: 13px; }
+.music-emoji-bg .emoji:nth-child(12), .music-emoji-bg--highlight .emoji:nth-child(12) { left: 78%; --dur: 66s; --delay: -14s; font-size: 12px; }
+.music-emoji-bg .emoji:nth-child(13), .music-emoji-bg--highlight .emoji:nth-child(13) { left: 83%; --dur: 82s; --delay: -28s; font-size: 11px; }
+.music-emoji-bg .emoji:nth-child(14), .music-emoji-bg--highlight .emoji:nth-child(14) { left: 88%; --dur: 74s; --delay: -18s; font-size: 12px; }
+.music-emoji-bg .emoji:nth-child(15), .music-emoji-bg--highlight .emoji:nth-child(15) { left: 92%; --dur: 90s; --delay: -40s; font-size: 14px; }
+.music-emoji-bg .emoji:nth-child(16), .music-emoji-bg--highlight .emoji:nth-child(16) { left: 15%; --dur: 84s; --delay: -50s; font-size: 12px; }
+.music-emoji-bg .emoji:nth-child(17), .music-emoji-bg--highlight .emoji:nth-child(17) { left: 37%; --dur: 92s; --delay: -22s; font-size: 13px; }
+.music-emoji-bg .emoji:nth-child(18), .music-emoji-bg--highlight .emoji:nth-child(18) { left: 66%; --dur: 96s; --delay: -58s; font-size: 12px; }
+/* Extra population for denser field */
+.music-emoji-bg .emoji:nth-child(19), .music-emoji-bg--highlight .emoji:nth-child(19) { left: 2%;  --dur: 82s; --delay: -12s; font-size: 11px; }
+.music-emoji-bg .emoji:nth-child(20), .music-emoji-bg--highlight .emoji:nth-child(20) { left: 9%;  --dur: 104s; --delay: -44s; font-size: 13px; }
+.music-emoji-bg .emoji:nth-child(21), .music-emoji-bg--highlight .emoji:nth-child(21) { left: 16%; --dur: 88s; --delay: -6s;  font-size: 12px; }
+.music-emoji-bg .emoji:nth-child(22), .music-emoji-bg--highlight .emoji:nth-child(22) { left: 21%; --dur: 92s; --delay: -28s; font-size: 11px; }
+.music-emoji-bg .emoji:nth-child(23), .music-emoji-bg--highlight .emoji:nth-child(23) { left: 29%; --dur: 100s; --delay: -18s; font-size: 12px; }
+.music-emoji-bg .emoji:nth-child(24), .music-emoji-bg--highlight .emoji:nth-child(24) { left: 34%; --dur: 74s;  --delay: -36s; font-size: 14px; }
+.music-emoji-bg .emoji:nth-child(25), .music-emoji-bg--highlight .emoji:nth-child(25) { left: 39%; --dur: 86s;  --delay: -8s;  font-size: 11px; }
+.music-emoji-bg .emoji:nth-child(26), .music-emoji-bg--highlight .emoji:nth-child(26) { left: 45%; --dur: 98s;  --delay: -24s; font-size: 12px; }
+.music-emoji-bg .emoji:nth-child(27), .music-emoji-bg--highlight .emoji:nth-child(27) { left: 51%; --dur: 90s;  --delay: -14s; font-size: 13px; }
+.music-emoji-bg .emoji:nth-child(28), .music-emoji-bg--highlight .emoji:nth-child(28) { left: 57%; --dur: 102s; --delay: -38s; font-size: 12px; }
+.music-emoji-bg .emoji:nth-child(29), .music-emoji-bg--highlight .emoji:nth-child(29) { left: 60%; --dur: 76s;  --delay: -4s;  font-size: 11px; }
+.music-emoji-bg .emoji:nth-child(30), .music-emoji-bg--highlight .emoji:nth-child(30) { left: 63%; --dur: 108s; --delay: -42s; font-size: 12px; }
+.music-emoji-bg .emoji:nth-child(31), .music-emoji-bg--highlight .emoji:nth-child(31) { left: 70%; --dur: 84s;  --delay: -10s; font-size: 13px; }
+.music-emoji-bg .emoji:nth-child(32), .music-emoji-bg--highlight .emoji:nth-child(32) { left: 75%; --dur: 94s;  --delay: -26s; font-size: 11px; }
+.music-emoji-bg .emoji:nth-child(33), .music-emoji-bg--highlight .emoji:nth-child(33) { left: 79%; --dur: 88s;  --delay: -16s; font-size: 12px; }
+.music-emoji-bg .emoji:nth-child(34), .music-emoji-bg--highlight .emoji:nth-child(34) { left: 82%; --dur: 110s; --delay: -48s; font-size: 13px; }
+.music-emoji-bg .emoji:nth-child(35), .music-emoji-bg--highlight .emoji:nth-child(35) { left: 86%; --dur: 96s;  --delay: -20s; font-size: 11px; }
+.music-emoji-bg .emoji:nth-child(36), .music-emoji-bg--highlight .emoji:nth-child(36) { left: 90%; --dur: 100s; --delay: -32s; font-size: 12px; }
+.music-emoji-bg .emoji:nth-child(37), .music-emoji-bg--highlight .emoji:nth-child(37) { left: 94%; --dur: 92s;  --delay: -12s; font-size: 11px; }
+.music-emoji-bg .emoji:nth-child(38), .music-emoji-bg--highlight .emoji:nth-child(38) { left: 7%;  --dur: 106s; --delay: -52s; font-size: 12px; }
+.music-emoji-bg .emoji:nth-child(39), .music-emoji-bg--highlight .emoji:nth-child(39) { left: 13%; --dur: 80s;  --delay: -6s;  font-size: 13px; }
+.music-emoji-bg .emoji:nth-child(40), .music-emoji-bg--highlight .emoji:nth-child(40) { left: 19%; --dur: 98s;  --delay: -28s; font-size: 11px; }
+.music-emoji-bg .emoji:nth-child(41), .music-emoji-bg--highlight .emoji:nth-child(41) { left: 23%; --dur: 88s;  --delay: -18s; font-size: 12px; }
+.music-emoji-bg .emoji:nth-child(42), .music-emoji-bg--highlight .emoji:nth-child(42) { left: 27%; --dur: 102s; --delay: -40s; font-size: 13px; }
+.music-emoji-bg .emoji:nth-child(43), .music-emoji-bg--highlight .emoji:nth-child(43) { left: 32%; --dur: 84s;  --delay: -8s;  font-size: 11px; }
+.music-emoji-bg .emoji:nth-child(44), .music-emoji-bg--highlight .emoji:nth-child(44) { left: 36%; --dur: 94s;  --delay: -22s; font-size: 12px; }
+.music-emoji-bg .emoji:nth-child(45), .music-emoji-bg--highlight .emoji:nth-child(45) { left: 44%; --dur: 108s; --delay: -58s; font-size: 13px; }
+.music-emoji-bg .emoji:nth-child(46), .music-emoji-bg--highlight .emoji:nth-child(46) { left: 53%; --dur: 90s;  --delay: -14s; font-size: 12px; }
+.music-emoji-bg .emoji:nth-child(47), .music-emoji-bg--highlight .emoji:nth-child(47) { left: 65%; --dur: 104s; --delay: -46s; font-size: 11px; }
+.music-emoji-bg .emoji:nth-child(48), .music-emoji-bg--highlight .emoji:nth-child(48) { left: 72%; --dur: 100s; --delay: -34s; font-size: 12px; }
+/* Additional ~30% density */
+.music-emoji-bg .emoji:nth-child(49), .music-emoji-bg--highlight .emoji:nth-child(49) { left: 4%;  --dur: 112s; --delay: -12s; font-size: 11px; }
+.music-emoji-bg .emoji:nth-child(50), .music-emoji-bg--highlight .emoji:nth-child(50) { left: 11%; --dur: 88s;  --delay: -26s; font-size: 12px; }
+.music-emoji-bg .emoji:nth-child(51), .music-emoji-bg--highlight .emoji:nth-child(51) { left: 17%; --dur: 102s; --delay: -44s; font-size: 11px; }
+.music-emoji-bg .emoji:nth-child(52), .music-emoji-bg--highlight .emoji:nth-child(52) { left: 22%; --dur: 96s;  --delay: -6s;  font-size: 13px; }
+.music-emoji-bg .emoji:nth-child(53), .music-emoji-bg--highlight .emoji:nth-child(53) { left: 28%; --dur: 110s; --delay: -34s; font-size: 12px; }
+.music-emoji-bg .emoji:nth-child(54), .music-emoji-bg--highlight .emoji:nth-child(54) { left: 35%; --dur: 90s;  --delay: -18s; font-size: 12px; }
+.music-emoji-bg .emoji:nth-child(55), .music-emoji-bg--highlight .emoji:nth-child(55) { left: 43%; --dur: 106s; --delay: -52s; font-size: 11px; }
+.music-emoji-bg .emoji:nth-child(56), .music-emoji-bg--highlight .emoji:nth-child(56) { left: 49%; --dur: 98s;  --delay: -10s; font-size: 13px; }
+.music-emoji-bg .emoji:nth-child(57), .music-emoji-bg--highlight .emoji:nth-child(57) { left: 56%; --dur: 114s; --delay: -40s; font-size: 12px; }
+.music-emoji-bg .emoji:nth-child(58), .music-emoji-bg--highlight .emoji:nth-child(58) { left: 61%; --dur: 92s;  --delay: -22s; font-size: 11px; }
+.music-emoji-bg .emoji:nth-child(59), .music-emoji-bg--highlight .emoji:nth-child(59) { left: 67%; --dur: 104s; --delay: -30s; font-size: 12px; }
+.music-emoji-bg .emoji:nth-child(60), .music-emoji-bg--highlight .emoji:nth-child(60) { left: 71%; --dur: 100s; --delay: -8s;  font-size: 11px; }
+.music-emoji-bg .emoji:nth-child(61), .music-emoji-bg--highlight .emoji:nth-child(61) { left: 77%; --dur: 116s; --delay: -48s; font-size: 13px; }
+.music-emoji-bg .emoji:nth-child(62), .music-emoji-bg--highlight .emoji:nth-child(62) { left: 89%; --dur: 96s;  --delay: -36s; font-size: 12px; }
+
+@keyframes float-up {
+	from { transform: translateY(0) scale(1.3); }
+	to   { transform: translateY(-130vh) scale(1.3); }
+}
+
+/* Additional ~30% more density (63–80) */
+.music-emoji-bg .emoji:nth-child(63), .music-emoji-bg--highlight .emoji:nth-child(63) { left: 6%;  --dur: 104s; --delay: -20s; font-size: 12px; }
+.music-emoji-bg .emoji:nth-child(64), .music-emoji-bg--highlight .emoji:nth-child(64) { left: 10%; --dur: 118s; --delay: -56s; font-size: 11px; }
+.music-emoji-bg .emoji:nth-child(65), .music-emoji-bg--highlight .emoji:nth-child(65) { left: 14%; --dur: 94s;  --delay: -16s; font-size: 13px; }
+.music-emoji-bg .emoji:nth-child(66), .music-emoji-bg--highlight .emoji:nth-child(66) { left: 20%; --dur: 108s; --delay: -42s; font-size: 12px; }
+.music-emoji-bg .emoji:nth-child(67), .music-emoji-bg--highlight .emoji:nth-child(67) { left: 24%; --dur: 100s; --delay: -10s; font-size: 11px; }
+.music-emoji-bg .emoji:nth-child(68), .music-emoji-bg--highlight .emoji:nth-child(68) { left: 31%; --dur: 112s; --delay: -38s; font-size: 12px; }
+.music-emoji-bg .emoji:nth-child(69), .music-emoji-bg--highlight .emoji:nth-child(69) { left: 38%; --dur: 90s;  --delay: -6s;  font-size: 13px; }
+.music-emoji-bg .emoji:nth-child(70), .music-emoji-bg--highlight .emoji:nth-child(70) { left: 47%; --dur: 122s; --delay: -60s; font-size: 11px; }
+.music-emoji-bg .emoji:nth-child(71), .music-emoji-bg--highlight .emoji:nth-child(71) { left: 52%; --dur: 96s;  --delay: -24s; font-size: 12px; }
+.music-emoji-bg .emoji:nth-child(72), .music-emoji-bg--highlight .emoji:nth-child(72) { left: 59%; --dur: 114s; --delay: -48s; font-size: 11px; }
+.music-emoji-bg .emoji:nth-child(73), .music-emoji-bg--highlight .emoji:nth-child(73) { left: 64%; --dur: 98s;  --delay: -12s; font-size: 12px; }
+.music-emoji-bg .emoji:nth-child(74), .music-emoji-bg--highlight .emoji:nth-child(74) { left: 69%; --dur: 106s; --delay: -30s; font-size: 13px; }
+.music-emoji-bg .emoji:nth-child(75), .music-emoji-bg--highlight .emoji:nth-child(75) { left: 74%; --dur: 92s;  --delay: -8s;  font-size: 11px; }
+.music-emoji-bg .emoji:nth-child(76), .music-emoji-bg--highlight .emoji:nth-child(76) { left: 81%; --dur: 120s; --delay: -54s; font-size: 12px; }
+.music-emoji-bg .emoji:nth-child(77), .music-emoji-bg--highlight .emoji:nth-child(77) { left: 85%; --dur: 100s; --delay: -26s; font-size: 11px; }
+.music-emoji-bg .emoji:nth-child(78), .music-emoji-bg--highlight .emoji:nth-child(78) { left: 91%; --dur: 116s; --delay: -40s; font-size: 12px; }
+.music-emoji-bg .emoji:nth-child(79), .music-emoji-bg--highlight .emoji:nth-child(79) { left: 96%; --dur: 102s; --delay: -18s; font-size: 13px; }
+.music-emoji-bg .emoji:nth-child(80), .music-emoji-bg--highlight .emoji:nth-child(80) { left: 1%;  --dur: 110s; --delay: -62s; font-size: 12px; }
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+	.music-emoji-bg .emoji { animation-duration: 180s; }
+}
+
+/* Center Marquee */
+.marquee-wrapper { position: relative; margin: 0 auto 3rem; max-width: 1100px; }
+ .marquee-shell {
+  position: relative;
+  overflow: hidden;
+  border: none;
+  border-radius: 26px;
+  background: linear-gradient(135deg, rgba(255,255,255,0.04), rgba(255,255,255,0.015));
+	padding: 1.5rem 0; /* thickness */
+  /* remove pronounced glass / shadow for minimal blend */
+  box-shadow: none;
+  transition: background 0.5s ease;
+ }
+ .marquee-shell:hover { background: linear-gradient(135deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02)); }
+/* Edge fading only */
+.marquee-shell:before, .marquee-shell:after {
+	content: ""; position: absolute; top:0; bottom:0; width:80px; pointer-events:none; z-index:2;
+}
+.marquee-shell:before { left:0; background:linear-gradient(to right, rgba(15,15,25,0.95), rgba(15,15,25,0)); }
+.marquee-shell:after { right:0; background:linear-gradient(to left, rgba(15,15,25,0.95), rgba(15,15,25,0)); }
+
+.marquee-track { display: flex; width: max-content; animation: marquee-slide 240s linear infinite; }
+.marquee-track.slow { animation-duration: 320s; }
+.marquee-track.reverse { animation-direction: reverse; }
+@keyframes marquee-slide { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+.marquee-shell:hover .marquee-track { animation-duration: 420s; }
+.marquee-item { position: relative; padding: 0 3.4rem; font-size: 1.08rem; font-weight: 600; color: var(--text-medium); letter-spacing: 0.08em; transition: color 0.25s ease; }
+/* Taller, slightly brighter divider */
+.marquee-item::after {
+	content: '';
+	position: absolute;
+	top: 50%;
+	right: 0;
+	transform: translateY(-50%);
+	width: 1.5px;
+	height: 62%;
+	background: linear-gradient(to bottom, rgba(200,220,255,0), rgba(210,230,255,0.45), rgba(200,220,255,0));
+	filter: drop-shadow(0 0 4px rgba(160,190,255,0.35));
+	opacity: 0.75;
+	pointer-events: none;
+}
+/* Hide divider on last duplicated item to avoid double line overlap perception */
+.marquee-item:last-child::after { display: none; }
+.marquee-item:hover { color: var(--text-bright); }
+.marquee-item button { all: unset; cursor: pointer; }
+.marquee-pop {
+	position: absolute;
+	left: 50%; top: -18px;
+	transform: translate(-50%, -100%);
+	background: rgba(20,20,35,0.95);
+	border: 1px solid rgba(255,255,255,0.15);
+	padding: 6px 10px;
+	border-radius: 10px;
+	font-size: 0.65rem;
+	letter-spacing: 0.05em;
+	line-height: 1.2;
+	white-space: nowrap;
+	color: var(--text-medium);
+	box-shadow: 0 4px 18px -4px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.05) inset;
+	opacity: 0;
+	transform-origin: bottom center;
+	scale: 0.85;
+	transition: opacity 0.25s ease, scale 0.25s ease;
+	pointer-events: none;
+}
+.marquee-item:hover .marquee-pop { opacity: 1; scale: 1; }
+@media (prefers-reduced-motion: reduce) { .marquee-track { animation-duration: 600s !important; } }
+
+/* Fluid subtle example chip buttons */
+.example-chip {
+	position: relative;
+	background: var(--dark-primary);
+	border: 1px solid rgba(255,255,255,0.08);
+	border-radius: 14px;
+	padding: 0.55rem 1rem;
+	font-weight: 500;
+	line-height: 1.1;
+	transition: border-color .6s ease, background .6s ease, color .45s ease, border-radius .6s ease, box-shadow .6s ease;
+	overflow: hidden;
+}
+.example-chip::before {
+	content: "";
+	position: absolute;
+	inset: 0;
+	padding: 1px; /* border thickness via mask */
+	border-radius: inherit;
+	background: linear-gradient(120deg, var(--chip-color) 0%, rgba(255,255,255,0.02) 65%);
+	-webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+	mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+	-webkit-mask-composite: xor;
+	mask-composite: exclude;
+	opacity: .38;
+	transition: opacity .6s ease, transform 1.2s ease;
+	pointer-events: none;
+}
+.example-chip:hover::before, .example-chip:focus-visible::before {
+	opacity: .85;
+	transform: rotate(18deg) scale(1.15);
+}
+.example-chip:hover, .example-chip:focus-visible {
+	border-color: var(--chip-color);
+	background: linear-gradient(135deg, color-mix(in srgb, var(--chip-color) 18%, transparent), rgba(255,255,255,0.04));
+	color: #fff !important;
+	border-radius: 22px;
+	box-shadow: 0 0 0 1px color-mix(in srgb, var(--chip-color) 50%, transparent), 0 4px 18px -4px color-mix(in srgb, var(--chip-color) 55%, transparent);
+}
+@supports not (color: color-mix(in srgb, white, black)) {
+	.example-chip:hover, .example-chip:focus-visible {
+		background: linear-gradient(135deg, var(--chip-color), rgba(255,255,255,0.04));
+	}
+}
+.example-chip:active { transform: translateY(1px); transition-duration: .2s; }
+.example-chip:focus-visible { outline: 2px solid var(--chip-color); outline-offset: 2px; }
+
+
+/* Wide variant: extend 30% both directions */
+.marquee-wrapper.wide {
+	width: calc(100% + 70%);
+	margin-left: -35%;
+	margin-right: -35%;
+	max-width: none;
+	overflow: hidden;
+}
+@media (max-width: 900px) {
+	.marquee-wrapper.wide { width: 100%; margin-left: 0; margin-right: 0; }
+}
+
+
