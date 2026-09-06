@@ -32,10 +32,11 @@ ENV PYTHONDONTWRITEBYTECODE=1
 # Expose port
 EXPOSE 8000
 
-# Health check
+# Health check (uses $PORT when set by the platform, e.g. Railway)
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD curl -f http://localhost:8000/health || exit 1
+    CMD curl -f http://localhost:${PORT:-8000}/health || exit 1
 
-# Run the application (single worker by default: safe for SQLite / in-memory limiter / Chroma file store).
-# Override with --workers 4 only when using Postgres + Redis rate-limit storage.
-CMD ["uvicorn", "api.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "1"]
+# Run the application (single worker: safe for in-memory limiter / Chroma file store).
+# Shell form so $PORT injected by the platform (Railway) is honored; defaults to 8000 locally.
+# Scale workers only when using Postgres + Redis rate-limit storage.
+CMD uvicorn api.main:app --host 0.0.0.0 --port ${PORT:-8000} --workers 1
